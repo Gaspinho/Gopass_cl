@@ -16,9 +16,9 @@ const LandingPage = () => {
 		setTimeout(() => {
 			const simulatedCarouselData = [
 				{
-					image: "https://cdn.vor.us/images/frontpage/2024/11/ubbidubbi.jpg",
-					date: "Apr 26 - 27",
-					title: "Ubbi Dubbi 2025",
+					image: "https://i.ibb.co/9hd2wZF/Whats-App-Image-2024-12-18-at-4-32-30-PM.jpg",
+					date: "Abril 26 - 27",
+					title: "Rave 2025",
 				},
 				{
 					image: "https://cdn.vor.us/images/frontpage/2024/10/movement.jpg",
@@ -36,22 +36,50 @@ const LandingPage = () => {
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "Great American Music Hall",
+					date: "Feb 14 - 16",
 					location: "San Francisco, CA",
 				},
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "The Rebel Lounge",
+					date: "Feb 14 - 16",
 					location: "Phoenix, AZ",
 				},
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "Troubadour",
+					date: "Feb 14 - 16",
 					location: "West Hollywood, CA",
 				},
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "Higher Ground",
+					date: "Feb 14 - 16",
 					location: "S. Burlington, VT",
+				},
+				{
+					image: "https://via.placeholder.com/250x150",
+					title: "Rave 2025",
+					date: "Feb 14 - 16",
+					location: "Los Angeles, Chile",
+				},
+				{
+					image: "https://via.placeholder.com/250x150",
+					title: "Club W party",
+					date: "Feb 14 - 16",
+					location: "Los Angeles, Chile",
+				},
+				{
+					image: "https://via.placeholder.com/250x150",
+					title: "Foret",
+					date: "Feb 14 - 16",
+					location: "Concepcion, Chile",
+				},
+				{
+					image: "https://via.placeholder.com/250x150",
+					title: "Feria Laboral",
+					date: "Feb 14 - 16",
+					location: "Santiago, Chile",
 				},
 			];
 
@@ -82,7 +110,7 @@ const LandingPage = () => {
 	};
 
 	if (loading) {
-		return <p style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</p>;
+		return <p style={{ textAlign: "center", marginTop: "2rem" }}>Cargando...</p>;
 	}
 
 	return (
@@ -97,7 +125,11 @@ const LandingPage = () => {
 					alignItems: "center",
 				}}
 			>
-				<h1 style={{ margin: 0, fontSize: "1.5rem" }}>See TICKETS</h1>
+				<img
+					src="https://i.ibb.co/yFWZzfV/logo-Negro.png" // Cambia esto por la URL de tu imagen
+					alt="GoPass cl"
+					style={{ height: "40px" }} // Ajusta el tamaño de la imagen según sea necesario
+				/>
 				<div>
 					<button
 						style={{
@@ -105,19 +137,20 @@ const LandingPage = () => {
 							padding: "0.5rem 1rem",
 							border: "none",
 							borderRadius: "4px",
-							backgroundColor: "#007bff",
+							backgroundColor: "#FF6F61",
 							color: "white",
 							cursor: "pointer",
 						}}
+						onClick={() => (window.location.href = "http://localhost:8123/auth/login")} // Cambia "/login" a la ruta deseada
 					>
-						Sign In/Up
+						Accede/Registrate
 					</button>
 					<button
 						style={{
 							padding: "0.5rem 1rem",
 							border: "none",
 							borderRadius: "4px",
-							backgroundColor: "#6c757d",
+							backgroundColor: "#FF6F61",
 							color: "white",
 							cursor: "pointer",
 						}}
@@ -131,7 +164,7 @@ const LandingPage = () => {
 			<section
 				style={{
 					marginTop: "1rem",
-					width: "80%",
+					width: "87%",
 					margin: "0 auto",
 					borderRadius: "12px",
 					overflow: "hidden",
@@ -173,7 +206,7 @@ const LandingPage = () => {
 			<section style={{ margin: "2rem 0", textAlign: "center" }}>
 				<input
 					type="text"
-					placeholder="Search for tickets by event, talent, organizer or location"
+					placeholder="Busca tus ticket por evento, talento, organizador, lugar"
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
 					style={{
@@ -190,7 +223,7 @@ const LandingPage = () => {
 						marginLeft: "1rem",
 						border: "none",
 						borderRadius: "4px",
-						backgroundColor: "#007bff",
+						backgroundColor: "#FF6F61",
 						color: "white",
 						cursor: "pointer",
 					}}
@@ -201,7 +234,7 @@ const LandingPage = () => {
 
 			{/* Events Grid */}
 			<section style={{ padding: "2rem" }}>
-				<h2 style={{ textAlign: "center", marginBottom: "1.5rem" }}>Upcoming Events</h2>
+				<h2 style={{ textAlign: "center", marginBottom: "1.5rem" }}>Proximos Eventos</h2>
 				<div
 					style={{
 						display: "flex",
