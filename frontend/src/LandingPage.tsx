@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
+import {useNavigate, useParams} from "react-router-dom";
 
 const LandingPage = () => {
 	const [carouselData, setCarouselData] = useState([]);
@@ -8,6 +9,7 @@ const LandingPage = () => {
 	const [filteredEvents, setFilteredEvents] = useState([]);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [loading, setLoading] = useState(true);
+	const navigate = useNavigate();
 
 	// Simulación de llamada al API
 	useEffect(() => {
@@ -19,16 +21,19 @@ const LandingPage = () => {
 					image: "https://i.ibb.co/9hd2wZF/Whats-App-Image-2024-12-18-at-4-32-30-PM.jpg",
 					date: "Abril 26 - 27",
 					title: "Rave 2025",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 				{
 					image: "https://cdn.vor.us/images/frontpage/2024/10/movement.jpg",
 					date: "May 24 - 26",
 					title: "Movement Music Festival",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 				{
 					image: "https://cdn.vor.us/images/frontpage/2024/12/gasparilla.jpg",
 					date: "Feb 14 - 16",
 					title: "Gasparilla Music Festival",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 			];
 
@@ -38,48 +43,56 @@ const LandingPage = () => {
 					title: "Great American Music Hall",
 					date: "Feb 14 - 16",
 					location: "San Francisco, CA",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "The Rebel Lounge",
 					date: "Feb 14 - 16",
 					location: "Phoenix, AZ",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "Troubadour",
 					date: "Feb 14 - 16",
 					location: "West Hollywood, CA",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "Higher Ground",
 					date: "Feb 14 - 16",
 					location: "S. Burlington, VT",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "Rave 2025",
 					date: "Feb 14 - 16",
 					location: "Los Angeles, Chile",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "Club W party",
 					date: "Feb 14 - 16",
 					location: "Los Angeles, Chile",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "Foret",
 					date: "Feb 14 - 16",
 					location: "Concepcion, Chile",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 				{
 					image: "https://via.placeholder.com/250x150",
 					title: "Feria Laboral",
 					date: "Feb 14 - 16",
 					location: "Santiago, Chile",
+					link: "https://demo.hi.events/event/1/dog-conf-2030",
 				},
 			];
 
@@ -118,11 +131,13 @@ const LandingPage = () => {
 			{/* Header */}
 			<header
 				style={{
+
 					padding: "1rem",
 					borderBottom: "1px solid #ccc",
 					display: "flex",
 					justifyContent: "space-between",
 					alignItems: "center",
+					  
 				}}
 			>
 				<img
@@ -141,7 +156,7 @@ const LandingPage = () => {
 							color: "white",
 							cursor: "pointer",
 						}}
-						onClick={() => (window.location.href = "http://localhost:8123/auth/login")} // Cambia "/login" a la ruta deseada
+						onClick={() => navigate('/auth/login')} // Cambia "/login" a la ruta deseada
 					>
 						Accede/Registrate
 					</button>
@@ -155,7 +170,7 @@ const LandingPage = () => {
 							cursor: "pointer",
 						}}
 					>
-						Support
+						Soporte
 					</button>
 				</div>
 			</header>
@@ -173,7 +188,11 @@ const LandingPage = () => {
 			>
 				<Carousel autoPlay infiniteLoop showThumbs={false} showStatus={false} interval={4000}>
 					{carouselData.map((item, index) => (
-						<div key={index} style={{ position: "relative", height: "400px" }}>
+						<div
+							key={index}
+							style={{ position: "relative", height: "400px", cursor: "pointer" }}
+							onClick={() => window.open(item.link,"_blank")} // Cambia la URL por la deseada
+						>
 							<img
 								src={item.image}
 								alt={item.title}
@@ -200,6 +219,8 @@ const LandingPage = () => {
 						</div>
 					))}
 				</Carousel>
+
+
 			</section>
 
 			{/* Search Bar */}
@@ -214,6 +235,7 @@ const LandingPage = () => {
 						padding: "0.5rem",
 						borderRadius: "4px",
 						border: "1px solid #ccc",
+						backgroundColor: "transparent",
 					}}
 				/>
 				<button
@@ -228,7 +250,7 @@ const LandingPage = () => {
 						cursor: "pointer",
 					}}
 				>
-					Search
+					Buscar
 				</button>
 			</section>
 
@@ -245,21 +267,29 @@ const LandingPage = () => {
 				>
 					{filteredEvents.map((event, index) => (
 						<div
-							key={index}
-							style={{
-								width: "250px",
-								border: "1px solid #ccc",
-								borderRadius: "8px",
-								overflow: "hidden",
-								boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-							}}
+						key={index}
+						style={{
+							width: "250px",
+							border: "1px solid #ccc",
+							borderRadius: "8px",
+							overflow: "hidden",
+							boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+						}}
+					>
+						<a
+							href={event.link}
+							target="_blank"
+							rel="noopener noreferrer"
+							style={{ textDecoration: "none", color: "inherit" }}
 						>
 							<img src={event.image} alt={event.title} style={{ width: "100%" }} />
 							<div style={{ padding: "1rem" }}>
 								<h3 style={{ margin: "0 0 0.5rem 0" }}>{event.title}</h3>
 								<p style={{ margin: 0, color: "#666" }}>{event.location}</p>
 							</div>
-						</div>
+						</a>
+					</div>
+					
 					))}
 				</div>
 			</section>

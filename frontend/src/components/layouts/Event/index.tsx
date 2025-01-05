@@ -117,7 +117,7 @@ const EventLayout = () => {
                 </div>
                 <div className={classes.logo}>
                     <NavLink to={'/manage/events'}>
-                        <img src={'/logo-text-only-white-text.png'} alt={''}/>
+                        <img src={'https://i.ibb.co/gmk5pzq/logo.png'} alt={''}/>
                     </NavLink>
                 </div>
                 <div className={classes.breadcrumbs}>

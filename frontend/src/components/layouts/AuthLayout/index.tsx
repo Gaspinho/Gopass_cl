@@ -21,7 +21,7 @@ const AuthLayout = () => {
             </header>
             <main className={classes.container}>
                 <div className={classes.logo}>
-                    <img src={'/logo-dark.svg'} alt={t`hi.events logo`}/>
+                    <img src={'https://i.ibb.co/yFWZzfV/logo-Negro.png'} alt={t`hi.events logo`}/>
                 </div>
                 <div className={classes.wrapper}>
                     <Outlet/>
