@@ -17,7 +17,7 @@ export interface OrderDetails {
 }
 
 export interface AttendeeDetails extends OrderDetails {
-    ticket_id: number,
+    product_id: number,
 }
 
 export interface FinaliseOrderPayload {
@@ -25,24 +25,29 @@ export interface FinaliseOrderPayload {
     attendees: AttendeeDetails[],
 }
 
+export interface EditOrderPayload {
+    first_name: string,
+    last_name: string,
+    email: string,
+    notes: string,
+}
 
-export interface TicketPriceQuantityFormValue {
+export interface ProductPriceQuantityFormValue {
     price?: number,
     quantity: number,
     price_id: number,
 }
 
-export interface TicketFormValue {
-    ticket_id: number,
-    quantities: TicketPriceQuantityFormValue[],
+export interface ProductFormValue {
+    product_id: number,
+    quantities: ProductPriceQuantityFormValue[],
 }
 
-export interface TicketFormPayload {
-    tickets?: TicketFormValue[],
+export interface ProductFormPayload {
+    products?: ProductFormValue[],
     promo_code: string | null,
     session_identifier?: string,
 }
-
 
 export interface RefundOrderPayload {
     amount: number;
@@ -85,16 +90,50 @@ export const orderClient = {
 
         return new Blob([response.data]);
     },
+
+    markAsPaid: async (eventId: IdParam, orderId: IdParam) => {
+        const response = await api.post<GenericDataResponse<Order>>('events/' + eventId + '/orders/' + orderId + '/mark-as-paid');
+        return response.data;
+    },
+
+    downloadInvoice: async (eventId: IdParam, orderId: IdParam): Promise<Blob> => {
+        const response = await api.get(`events/${eventId}/orders/${orderId}/invoice`, {
+            responseType: 'blob',
+        });
+
+        return new Blob([response.data]);
+    },
+
+    editOrder: async (eventId: IdParam, orderId: IdParam, payload: EditOrderPayload) => {
+        const response = await api.put<GenericDataResponse<Order>>(`events/${eventId}/orders/${orderId}`, payload);
+        return response.data;
+    }
 }
 
 export const orderClientPublic = {
-    create: async (eventId: number, createOrderPayload: TicketFormPayload) => {
+    create: async (eventId: number, createOrderPayload: ProductFormPayload) => {
         const response = await publicApi.post<GenericDataResponse<Order>>('events/' + eventId + '/order', createOrderPayload);
         return response.data;
     },
 
-    findByShortId: async (eventId: number, orderShortId: string, includes: string[] = []) => {
-        const response = await publicApi.get<GenericDataResponse<Order>>(`events/${eventId}/order/${orderShortId}?include=${includes.join(',')}`);
+    findByShortId: async (
+        eventId: number,
+        orderShortId: string,
+        includes: string[] = [],
+        sessionIdentifier?: string
+    ) => {
+        const query = new URLSearchParams();
+        if (includes.length > 0) {
+            query.append("include", includes.join(","));
+        }
+        if (sessionIdentifier) {
+            query.append("session_identifier", sessionIdentifier);
+        }
+
+        const response = await publicApi.get<GenericDataResponse<Order>>(
+            `events/${eventId}/order/${orderShortId}?${query.toString()}`
+        );
+
         return response.data;
     },
 
@@ -102,11 +141,11 @@ export const orderClientPublic = {
         return await publicApi.get<StripePaymentIntent>(`events/${eventId}/order/${orderShortId}/stripe/payment_intent`);
     },
 
-    createStripePaymentIntent: async (eventId: number, orderShortId: string, sessionIdentifier: string) => {
+    createStripePaymentIntent: async (eventId: number, orderShortId: string) => {
         const response = await publicApi.post<{
             client_secret: string,
             account_id?: string,
-        }>(`events/${eventId}/order/${orderShortId}/stripe/payment_intent?session_identifier=${sessionIdentifier}`);
+        }>(`events/${eventId}/order/${orderShortId}/stripe/payment_intent`);
         return response.data;
     },
 
@@ -117,5 +156,18 @@ export const orderClientPublic = {
     ) => {
         const response = await publicApi.put<GenericDataResponse<Order>>(`events/${eventId}/order/${orderShortId}`, payload);
         return response.data;
+    },
+
+    transitionToOfflinePayment: async (eventId: IdParam, orderShortId: IdParam) => {
+        const response = await publicApi.post<GenericDataResponse<Order>>(`events/${eventId}/order/${orderShortId}/await-offline-payment`);
+        return response.data;
+    },
+
+    downloadInvoice: async (eventId: IdParam, orderShortId: IdParam): Promise<Blob> => {
+        const response = await publicApi.get(`events/${eventId}/order/${orderShortId}/invoice`, {
+            responseType: 'blob',
+        });
+
+        return new Blob([response.data]);
     },
 }

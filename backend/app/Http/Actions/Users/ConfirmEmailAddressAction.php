@@ -4,8 +4,8 @@ namespace HiEvents\Http\Actions\Users;
 
 use HiEvents\DomainObjects\UserDomainObject;
 use HiEvents\Http\Actions\BaseAction;
-use HiEvents\Services\Handlers\User\ConfirmEmailAddressHandler;
-use HiEvents\Services\Handlers\User\DTO\ConfirmEmailChangeDTO;
+use HiEvents\Services\Application\Handlers\User\ConfirmEmailAddressHandler;
+use HiEvents\Services\Application\Handlers\User\DTO\ConfirmEmailChangeDTO;
 use HiEvents\Services\Infrastructure\Encryption\Exception\DecryptionFailedException;
 use HiEvents\Services\Infrastructure\Encryption\Exception\EncryptedPayloadExpiredException;
 use Illuminate\Http\JsonResponse;
@@ -23,13 +23,13 @@ class ConfirmEmailAddressAction extends BaseAction
     /**
      * @throws DecryptionFailedException|Throwable
      */
-    public function __invoke(int $userId, string $token): Response|JsonResponse
+    public function __invoke(int $userId, string $resetToken): Response|JsonResponse
     {
         $this->isActionAuthorized($userId, UserDomainObject::class);
 
         try {
             $this->confirmEmailAddressHandler->handle(new ConfirmEmailChangeDTO(
-                token: $token,
+                token: $resetToken,
                 accountId: $this->getAuthenticatedAccountId(),
             ));
         } catch (EncryptedPayloadExpiredException) {

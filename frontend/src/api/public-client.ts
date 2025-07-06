@@ -2,13 +2,9 @@ import axios from "axios";
 import {isSsr} from "../utilites/helpers";
 import {getConfig} from "../utilites/config";
 
-export const publicApi = axios.create();
-
-const existingToken = typeof window !== "undefined" ? window?.localStorage?.getItem('token') : undefined;
-
-if (existingToken) {
-    publicApi.defaults.headers.common['Authorization'] = `Bearer ${existingToken}`;
-}
+export const publicApi = axios.create({
+    withCredentials: true,
+});
 
 publicApi.interceptors.request.use((config) => {
     const baseUrl = isSsr()

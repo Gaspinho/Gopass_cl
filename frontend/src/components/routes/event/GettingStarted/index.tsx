@@ -3,7 +3,7 @@ import {Card} from "../../../common/Card";
 import {t} from "@lingui/macro"
 import {Button} from "@mantine/core";
 import classes from "./GettingStarted.module.scss";
-import {useParams} from "react-router-dom";
+import {useParams} from "react-router";
 import {IconCheck} from "@tabler/icons-react";
 import {useGetEvent} from "../../../../queries/useGetEvent.ts";
 import {useGetEventImages} from "../../../../queries/useGetEventImages.ts";
@@ -11,13 +11,14 @@ import {Tooltip} from "../../../common/Tooltip";
 import {useGetAccount} from "../../../../queries/useGetAccount.ts";
 import {useUpdateEventStatus} from "../../../../mutations/useUpdateEventStatus.ts";
 import {showError, showSuccess} from "../../../../utilites/notifications.tsx";
+import {getProductsFromEvent} from "../../../../utilites/helpers.ts";
 
 const GettingStarted = () => {
     const {eventId} = useParams();
     const eventQuery = useGetEvent(eventId);
     const event = eventQuery.data;
-    const tickets = event?.tickets;
-    const hasTickets = tickets && tickets.length > 0;
+    const products = getProductsFromEvent(event);
+    const hasProducts = products && products.length > 0;
     const eventImagesQuery = useGetEventImages(eventId);
     const eventImages = eventImagesQuery.data;
     const hasImages = eventImages && eventImages.length > 0;
@@ -63,17 +64,18 @@ const GettingStarted = () => {
                 <div className={classes.actionItems}>
                     <Card>
                         <h2>
-                            {t`🎟️ Add tickets`}
+                            {t`🎟️ Add products`}
                         </h2>
                         <p>
-                            {t`Create tickets for your event, set prices, and manage available quantity.`}
+                            {t`Create products for your event, set prices, and manage available quantity.`}
                         </p>
 
-                        <Button variant={'light'} component={'a'} href={'/manage/event/' + eventId + '/tickets#create-ticket'}>
-                            {hasTickets ? t`Add More tickets` : t`Add tickets`}
+                        <Button variant={'light'} component={'a'}
+                                href={'/manage/event/' + eventId + '/products#create-product'}>
+                            {hasProducts ? t`Add More products` : t`Add products`}
                         </Button>
 
-                        {hasTickets && <Check/>}
+                        {hasProducts && <Check/>}
                     </Card>
                     <Card>
                         <h2>
@@ -86,6 +88,20 @@ const GettingStarted = () => {
                             {event?.description ? t`Continue set up` : t`Set up your event`}
                         </Button>
                         {event?.description && <Check/>}
+                    </Card>
+                    <Card>
+                        <h2>
+                            {t`💳 Connect with Stripe`}
+                        </h2>
+                        <p>
+                            {t`Connect your Stripe account to start receiving payments.`}
+                        </p>
+                        {!account?.stripe_connect_setup_complete && (
+                            <Button variant={'light'} component={'a'} href={'/account/payment'}>
+                                {t`Connect with Stripe`}
+                            </Button>)
+                        }
+                        {account?.stripe_connect_setup_complete && <Check/>}
                     </Card>
                     <Card>
                         <h2>
@@ -105,7 +121,7 @@ const GettingStarted = () => {
                             {t`🚀 Set your event live`}
                         </h2>
                         <p>
-                            {t`Once you're ready, set your event live and start selling tickets.`}
+                            {t`Once you're ready, set your event live and start selling products.`}
                         </p>
                         {event?.status !== 'LIVE' &&
                             (<Button variant={'light'} onClick={handleStatusToggle}>
@@ -113,20 +129,6 @@ const GettingStarted = () => {
                                 </Button>
                             )}
                         {event?.status === 'LIVE' && <Check/>}
-                    </Card>
-                    <Card>
-                        <h2>
-                            {t`💳 Connect with Stripe`}
-                        </h2>
-                        <p>
-                            {t`Connect your Stripe account to start receiving payments.`}
-                        </p>
-                        {!account?.stripe_connect_setup_complete && (
-                            <Button variant={'light'} component={'a'} href={'/account/payment'}>
-                                {t`Connect with Stripe`}
-                            </Button>)
-                        }
-                        {account?.stripe_connect_setup_complete && <Check/>}
                     </Card>
                     <Card>
                         <h2>

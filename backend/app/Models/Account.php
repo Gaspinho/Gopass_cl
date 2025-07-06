@@ -5,19 +5,13 @@ declare(strict_types=1);
 namespace HiEvents\Models;
 
 use HiEvents\DomainObjects\Enums\Role;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Account extends BaseModel
 {
-    protected function getCastMap(): array
-    {
-        return [];
-    }
-
-    protected function getFillableFields(): array
-    {
-        return [];
-    }
+    use SoftDeletes;
 
     public function users(): BelongsToMany
     {
@@ -29,5 +23,13 @@ class Account extends BaseModel
     public function usersByRole(Role $roleName): BelongsToMany
     {
         return $this->users()->wherePivot('role', '=', $roleName->name);
+    }
+
+    public function configuration(): BelongsTo
+    {
+        return $this->belongsTo(
+            related: AccountConfiguration::class,
+            foreignKey: 'account_configuration_id',
+        );
     }
 }

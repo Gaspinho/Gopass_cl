@@ -2,6 +2,7 @@
 
 namespace HiEvents\Services\Infrastructure\Session;
 
+use Illuminate\Config\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
@@ -14,13 +15,14 @@ class CheckoutSessionManagementService
     private ?string $sessionId = null;
 
     public function __construct(
-        private readonly Request $request,
+        private readonly Request    $request,
+        private readonly Repository $config,
     )
     {
     }
 
     /**
-     * Get the session ID from the cookie, or generate a new one if it doesn't exist.
+     * Get the session ID from query param, cookie, or generate a new one.
      */
     public function getSessionId(): string
     {
@@ -28,7 +30,9 @@ class CheckoutSessionManagementService
             return $this->sessionId;
         }
 
-        $this->sessionId = $this->request->cookie(self::SESSION_IDENTIFIER) ?? $this->createSessionId();
+        $this->sessionId = $this->request->query(self::SESSION_IDENTIFIER)
+            ?? $this->request->cookie(self::SESSION_IDENTIFIER)
+            ?? $this->createSessionId();
 
         return $this->sessionId;
     }
@@ -43,6 +47,7 @@ class CheckoutSessionManagementService
         return Cookie::make(
             name: self::SESSION_IDENTIFIER,
             value: $this->getSessionId(),
+            domain: $this->config->get('session.domain') ?? '.' . $this->request->getHost(),
             secure: true,
             sameSite: 'None',
         );

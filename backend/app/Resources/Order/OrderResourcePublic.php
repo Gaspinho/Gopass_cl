@@ -8,6 +8,7 @@ use HiEvents\DomainObjects\Status\OrderStatus;
 use HiEvents\Resources\Attendee\AttendeeResourcePublic;
 use HiEvents\Resources\BaseResource;
 use HiEvents\Resources\Event\EventResourcePublic;
+use HiEvents\Resources\Order\Invoice\InvoiceResourcePublic;
 use Illuminate\Http\Request;
 
 /**
@@ -46,6 +47,10 @@ class OrderResourcePublic extends BaseResource
                     includePostCheckoutData: $this->getStatus() === OrderStatus::COMPLETED->name,
                 ),
             ),
+            'latest_invoice' => $this->when(
+                !is_null($this->getLatestInvoice()),
+                fn() => (new InvoiceResourcePublic($this->getLatestInvoice()))->toArray($request),
+            ),
             'address' => $this->when(
                 !is_null($this->getAddress()),
                 fn() => $this->getAddress()
@@ -58,6 +63,9 @@ class OrderResourcePublic extends BaseResource
                 !is_null($this->getAttendees()),
                 fn() => AttendeeResourcePublic::collection($this->getAttendees())
             ),
+            $this->mergeWhen($this->getSessionIdentifier() !== null, fn() => [
+                'session_identifier' => $this->getSessionIdentifier(),
+            ]),
         ];
     }
 }

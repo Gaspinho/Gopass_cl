@@ -6,15 +6,12 @@ namespace HiEvents\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @mixin Builder
  */
 abstract class BaseModel extends Model
 {
-    use SoftDeletes;
-
     /** @var array */
     protected $guarded = [];
 
@@ -27,9 +24,15 @@ abstract class BaseModel extends Model
         parent::__construct($attributes);
     }
 
-    abstract protected function getCastMap(): array;
+    protected function getCastMap(): array
+    {
+        return [];
+    }
 
-    abstract protected function getFillableFields(): array;
+    protected function getFillableFields() : array
+    {
+        return [];
+    }
 
     protected function getTimestampsEnabled(): bool
     {

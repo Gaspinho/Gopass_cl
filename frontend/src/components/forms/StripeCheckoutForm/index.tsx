@@ -1,27 +1,45 @@
 import {useEffect, useState} from "react";
 import {PaymentElement, useElements, useStripe} from "@stripe/react-stripe-js";
-import {useParams} from "react-router-dom";
+import {useParams} from "react-router";
 import * as stripeJs from "@stripe/stripe-js";
 import {Alert, Skeleton} from "@mantine/core";
 import {t} from "@lingui/macro";
 import classes from './StripeCheckoutForm.module.scss';
 import {LoadingMask} from "../../common/LoadingMask";
 import {useGetOrderPublic} from "../../../queries/useGetOrderPublic.ts";
-import {useGetEventPublic} from "../../../queries/useGetEventPublic.ts";
 import {CheckoutContent} from "../../layouts/Checkout/CheckoutContent";
-import {CheckoutFooter} from "../../layouts/Checkout/CheckoutFooter";
-import {Event} from "../../../types.ts";
-import {eventCheckoutPath, eventHomepagePath} from "../../../utilites/urlHelper.ts";
 import {HomepageInfoMessage} from "../../common/HomepageInfoMessage";
+import {eventCheckoutPath, eventHomepagePath} from "../../../utilites/urlHelper.ts";
+import {Event} from "../../../types.ts";
 
-export default function StripeCheckoutForm() {
+export default function StripeCheckoutForm({setSubmitHandler}: {
+    setSubmitHandler: (submitHandler: () => () => Promise<void>) => void
+}) {
     const {eventId, orderShortId} = useParams();
     const stripe = useStripe();
     const elements = useElements();
     const [message, setMessage] = useState<string | undefined>('');
-    const [isLoading, setIsLoading] = useState(false);
-    const {data: order, isFetched: isOrderFetched} = useGetOrderPublic(eventId, orderShortId);
-    const {data: event, isFetched: isEventFetched} = useGetEventPublic(eventId);
+    const {data: order, isFetched: isOrderFetched} = useGetOrderPublic(eventId, orderShortId, ['event']);
+    const event = order?.event;
+
+    const handleSubmit = async () => {
+        if (!stripe || !elements) {
+            return;
+        }
+
+        const {error} = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: window?.location.origin + `/checkout/${eventId}/${orderShortId}/payment_return`
+            },
+        });
+
+        if (error?.type === "card_error" || error?.type === "validation_error") {
+            setMessage(error.message);
+        } else {
+            setMessage(t`An unexpected error occurred.`);
+        }
+    };
 
     useEffect(() => {
         if (!stripe) {
@@ -54,12 +72,19 @@ export default function StripeCheckoutForm() {
         });
     }, [stripe]);
 
-    if (!isOrderFetched || !isEventFetched || !order?.payment_status) {
+    useEffect(() => {
+        if (setSubmitHandler) {
+            setSubmitHandler(() => handleSubmit);
+        }
+
+    }, [setSubmitHandler, stripe, elements]);
+
+    if (!isOrderFetched || !order?.payment_status) {
         return (
             <CheckoutContent>
                 <Skeleton height={300} mb={20}/>
             </CheckoutContent>
-        )
+        );
     }
 
     if (order?.payment_status === 'PAYMENT_RECEIVED') {
@@ -82,42 +107,18 @@ export default function StripeCheckoutForm() {
         );
     }
 
-    const handleSubmit = async (e: any) => {
-        e.preventDefault();
-
-        if (!stripe || !elements) {
-            return;
-        }
-
-        setIsLoading(true);
-
-        const {error} = await stripe.confirmPayment({
-            elements,
-            confirmParams: {
-                return_url: window?.location.origin + `/checkout/${eventId}/${orderShortId}/payment_return`
-            },
-        });
-
-        if (error.type === "card_error" || error.type === "validation_error") {
-            setMessage(error.message);
-        } else {
-            setMessage(t`An unexpected error occurred.`);
-        }
-
-        setIsLoading(false);
-    };
-
     const paymentElementOptions: stripeJs.StripePaymentElementOptions = {
         layout: {
             type: "accordion",
             defaultCollapsed: false,
             radios: true,
+            spacedAccordionItems: true,
         },
-    }
+    };
 
     return (
-        <form id="payment-form" onSubmit={handleSubmit}>
-            <CheckoutContent>
+        <form id="payment-form">
+            <>
                 <h2>
                     {t`Payment`}
                 </h2>
@@ -127,21 +128,12 @@ export default function StripeCheckoutForm() {
 
                 {message !== '' && <Alert mb={20}>{message}</Alert>}
                 <LoadingMask/>
-                <PaymentElement className={classes.stripeForElement} id="payment-element"
-                                options={paymentElementOptions} onReady={() => setIsLoading(false)}/>
-
-                <div className={classes.stripeLogo}>
-                    <img
-                        src={'https://cdn.brandfolder.io/KGT2DTA4/at/g65qkq94m43qc3c9fqnhh3m/Powered_by_Stripe_-_black.svg'}
-                        alt={t`Powered by Stripe`} width={'100px'} height={'auto'}/>
-                </div>
-            </CheckoutContent>
-            <CheckoutFooter
-                event={event as Event}
-                order={order}
-                isLoading={isLoading}
-                buttonText={t`Complete Payment`}
-            />
+                <PaymentElement
+                    className={classes.stripeForElement}
+                    id="payment-element"
+                    options={paymentElementOptions}
+                />
+            </>
         </form>
     );
 }

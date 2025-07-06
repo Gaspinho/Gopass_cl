@@ -1,6 +1,12 @@
 <?php
 
 return [
+    /*
+     * The name of the queue that should be used to send webhooks.
+     *
+     * Falls back to the default queue connection if not set.
+     */
+    'webhook_queue_name' => env('WEBHOOK_QUEUE_NAME', env('QUEUE_CONNECTION', 'sync')),
 
     /*
     |--------------------------------------------------------------------------
@@ -59,7 +65,7 @@ return [
             'queue' => env('SQS_QUEUE', 'default'),
             'suffix' => env('SQS_SUFFIX'),
             'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-            'after_commit' => false,
+            'after_commit' => true,
         ],
 
         'redis' => [

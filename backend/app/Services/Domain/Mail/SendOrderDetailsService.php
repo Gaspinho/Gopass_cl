@@ -5,6 +5,7 @@ namespace HiEvents\Services\Domain\Mail;
 use HiEvents\DomainObjects\AttendeeDomainObject;
 use HiEvents\DomainObjects\EventDomainObject;
 use HiEvents\DomainObjects\EventSettingDomainObject;
+use HiEvents\DomainObjects\InvoiceDomainObject;
 use HiEvents\DomainObjects\OrderDomainObject;
 use HiEvents\DomainObjects\OrderItemDomainObject;
 use HiEvents\DomainObjects\OrganizerDomainObject;
@@ -17,13 +18,13 @@ use HiEvents\Repository\Interfaces\OrderRepositoryInterface;
 use HiEvents\Services\Domain\Attendee\SendAttendeeTicketService;
 use Illuminate\Mail\Mailer;
 
-readonly class SendOrderDetailsService
+class SendOrderDetailsService
 {
     public function __construct(
-        private EventRepositoryInterface  $eventRepository,
-        private OrderRepositoryInterface  $orderRepository,
-        private Mailer                    $mailer,
-        private SendAttendeeTicketService $sendAttendeeTicketService,
+        private readonly EventRepositoryInterface  $eventRepository,
+        private readonly OrderRepositoryInterface  $orderRepository,
+        private readonly Mailer                    $mailer,
+        private readonly SendAttendeeTicketService $sendAttendeeTicketService,
     )
     {
     }
@@ -33,6 +34,7 @@ readonly class SendOrderDetailsService
         $order = $this->orderRepository
             ->loadRelation(OrderItemDomainObject::class)
             ->loadRelation(AttendeeDomainObject::class)
+            ->loadRelation(InvoiceDomainObject::class)
             ->findById($order->getId());
 
         $event = $this->eventRepository
@@ -40,7 +42,7 @@ readonly class SendOrderDetailsService
             ->loadRelation(new Relationship(EventSettingDomainObject::class))
             ->findById($order->getEventId());
 
-        if ($order->isOrderCompleted()) {
+        if ($order->isOrderCompleted() || $order->isOrderAwaitingOfflinePayment()) {
             $this->sendOrderSummaryEmails($order, $event);
             $this->sendAttendeeTicketEmails($order, $event);
         }
@@ -57,6 +59,26 @@ readonly class SendOrderDetailsService
         }
     }
 
+    public function sendCustomerOrderSummary(
+        OrderDomainObject        $order,
+        EventDomainObject        $event,
+        OrganizerDomainObject    $organizer,
+        EventSettingDomainObject $eventSettings,
+        ?InvoiceDomainObject     $invoice = null
+    ): void
+    {
+        $this->mailer
+            ->to($order->getEmail())
+            ->locale($order->getLocale())
+            ->send(new OrderSummary(
+                order: $order,
+                event: $event,
+                organizer: $organizer,
+                eventSettings: $eventSettings,
+                invoice: $invoice,
+            ));
+    }
+
     private function sendAttendeeTicketEmails(OrderDomainObject $order, EventDomainObject $event): void
     {
         $sentEmails = [];
@@ -66,6 +88,7 @@ readonly class SendOrderDetailsService
             }
 
             $this->sendAttendeeTicketService->send(
+                order: $order,
                 attendee: $attendee,
                 event: $event,
                 eventSettings: $event->getEventSettings(),
@@ -78,15 +101,13 @@ readonly class SendOrderDetailsService
 
     private function sendOrderSummaryEmails(OrderDomainObject $order, EventDomainObject $event): void
     {
-        $this->mailer
-            ->to($order->getEmail())
-            ->locale($order->getLocale())
-            ->send(new OrderSummary(
-                order: $order,
-                event: $event,
-                organizer: $event->getOrganizer(),
-                eventSettings: $event->getEventSettings(),
-            ));
+        $this->sendCustomerOrderSummary(
+            order: $order,
+            event: $event,
+            organizer: $event->getOrganizer(),
+            eventSettings: $event->getEventSettings(),
+            invoice: $order->getLatestInvoice(),
+        );
 
         if ($order->getIsManuallyCreated() || !$event->getEventSettings()->getNotifyOrganizerOfNewOrders()) {
             return;

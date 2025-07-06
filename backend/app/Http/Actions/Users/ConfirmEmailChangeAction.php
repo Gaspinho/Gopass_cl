@@ -6,8 +6,8 @@ use HiEvents\DomainObjects\UserDomainObject;
 use HiEvents\Exceptions\ResourceConflictException;
 use HiEvents\Http\Actions\BaseAction;
 use HiEvents\Resources\User\UserResource;
-use HiEvents\Services\Handlers\User\ConfirmEmailChangeHandler;
-use HiEvents\Services\Handlers\User\DTO\ConfirmEmailChangeDTO;
+use HiEvents\Services\Application\Handlers\User\ConfirmEmailChangeHandler;
+use HiEvents\Services\Application\Handlers\User\DTO\ConfirmEmailChangeDTO;
 use HiEvents\Services\Infrastructure\Encryption\Exception\DecryptionFailedException;
 use HiEvents\Services\Infrastructure\Encryption\Exception\EncryptedPayloadExpiredException;
 use Illuminate\Http\JsonResponse;
@@ -27,13 +27,13 @@ class ConfirmEmailChangeAction extends BaseAction
     /**
      * @throws DecryptionFailedException|Throwable
      */
-    public function __invoke(int $userId, string $token): Response|JsonResponse
+    public function __invoke(int $userId, string $changeToken): Response|JsonResponse
     {
         $this->isActionAuthorized($userId, UserDomainObject::class);
 
         try {
             $user = $this->confirmEmailChangeHandler->handle(new ConfirmEmailChangeDTO(
-                token: $token,
+                token: $changeToken,
                 accountId: $this->getAuthenticatedAccountId(),
             ));
         } catch (EncryptedPayloadExpiredException) {

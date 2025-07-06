@@ -1,11 +1,10 @@
 import {publicApi} from "./public-client";
 import {
     Attendee,
-    CheckIn,
     CheckInList,
     GenericDataResponse,
     GenericPaginatedResponse,
-    IdParam,
+    IdParam, PublicCheckIn,
     QueryFilters,
 } from "../types";
 import {queryParamsHelper} from "../utilites/queryParamsHelper";
@@ -19,14 +18,19 @@ export const publicCheckInClient = {
         const response = await publicApi.get<GenericPaginatedResponse<Attendee>>(`/check-in-lists/${checkInListShortId}/attendees` + queryParamsHelper.buildQueryString(pagination));
         return response.data;
     },
-    createCheckIn: async (checkInListShortId: IdParam, attendeePublicId: IdParam) => {
-        const response = await publicApi.post<GenericDataResponse<CheckIn[]>>(`/check-in-lists/${checkInListShortId}/check-ins`, {
-            "attendee_public_ids": [attendeePublicId],
+    createCheckIn: async (checkInListShortId: IdParam, attendeePublicId: IdParam, action: 'check-in' | 'check-in-and-mark-order-as-paid') => {
+        const response = await publicApi.post<GenericDataResponse<PublicCheckIn[]>>(`/check-in-lists/${checkInListShortId}/check-ins`, {
+            "attendees": [
+                {
+                    "public_id": attendeePublicId,
+                    "action": action
+                }
+            ]
         });
         return response.data;
     },
     deleteCheckIn: async (checkInListShortId: IdParam, checkInShortId: IdParam) => {
-        const response = await publicApi.delete<GenericDataResponse<CheckIn>>(`/check-in-lists/${checkInListShortId}/check-ins/${checkInShortId}`);
+        const response = await publicApi.delete<GenericDataResponse<PublicCheckIn>>(`/check-in-lists/${checkInListShortId}/check-ins/${checkInShortId}`);
         return response.data;
     },
 };

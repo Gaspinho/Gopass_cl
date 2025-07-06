@@ -4,9 +4,12 @@ namespace HiEvents\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrderItem extends BaseModel
 {
+    use SoftDeletes;
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
@@ -36,13 +39,13 @@ class OrderItem extends BaseModel
         return [];
     }
 
-    public function ticket_price(): HasOne
+    public function product_price(): HasOne
     {
-        return $this->hasOne(TicketPrice::class);
+        return $this->hasOne(ProductPrice::class);
     }
 
-    public function ticket(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Ticket::class);
+        return $this->belongsTo(Product::class);
     }
 }

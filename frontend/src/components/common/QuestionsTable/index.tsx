@@ -8,6 +8,7 @@ import {
     IconInfoCircle,
     IconPencil,
     IconPlus,
+    IconTableExport,
     IconTrash
 } from "@tabler/icons-react";
 import Truncate from "../Truncate";
@@ -22,7 +23,7 @@ import {t} from "@lingui/macro";
 import {useEffect, useState} from "react";
 import {EditQuestionModal} from "../../modals/EditQuestionModal";
 import {useDeleteQuestion} from "../../../mutations/useDeleteQuestion.ts";
-import {useParams} from "react-router-dom";
+import {useParams} from "react-router";
 import {showError, showSuccess} from "../../../utilites/notifications.tsx";
 import {confirmationDialog} from "../../../utilites/confirmationDialog.tsx";
 import {InputGroup} from "../InputGroup";
@@ -41,6 +42,7 @@ import {CSS} from "@dnd-kit/utilities";
 import {useSortQuestions} from "../../../mutations/useSortQuestions.ts";
 import classNames from "classnames";
 import {Popover} from "../Popover";
+import {useExportAnswers} from "../../../mutations/useExportAnswers.ts";
 
 interface QuestionsTableProp {
     questions: Partial<Question>[];
@@ -222,7 +224,7 @@ const DefaultQuestions = () => (
 );
 
 export const QuestionsTable = ({questions}: QuestionsTableProp) => {
-    const ticketQuestions = questions.filter(question => question.belongs_to === "TICKET");
+    const productQuestions = questions.filter(question => question.belongs_to === "PRODUCT");
     const orderQuestions = questions.filter(question => question.belongs_to === "ORDER");
     const form = useForm();
     const [createModalOpen, {open: openCreateModal, close: closeCreateModal}] = useDisclosure(false);
@@ -251,6 +253,22 @@ export const QuestionsTable = ({questions}: QuestionsTableProp) => {
         }
     }
 
+    const ExportAnswersButton = () => {
+        const {eventId} = useParams();
+        const {startExport, isExporting} = useExportAnswers(eventId);
+
+        return (
+            <Button
+                loading={isExporting}
+                color="green"
+                rightSection={<IconTableExport size={20}/>}
+                onClick={() => startExport()}
+            >
+                {t`Export answers`}
+            </Button>
+        );
+    };
+
     return (
         <div className={classes.outer}>
             <PageTitle>
@@ -258,9 +276,12 @@ export const QuestionsTable = ({questions}: QuestionsTableProp) => {
             </PageTitle>
             <Card>
                 <div className={classes.actions}>
-                    <Button color={'green'} rightSection={<IconPlus/>} onClick={openCreateModal}>
-                        {t`Add question`}
-                    </Button>
+                    <>
+                        <Button color={'green'} rightSection={<IconPlus/>} onClick={openCreateModal}>
+                            {t`Add question`}
+                        </Button>
+                        <ExportAnswersButton/>
+                    </>
                     <div className={classes.hiddenToggle}>
                         <Group>
                             <span className={classes.hiddenCount}>
@@ -304,13 +325,13 @@ export const QuestionsTable = ({questions}: QuestionsTableProp) => {
                         )}
                     </div>
                     <div className={classes.questions}>
-                        <h3>{t`Attendee questions`}</h3>
+                        <h3>{t`Product questions`}</h3>
                         <QuestionsList
-                            questions={ticketQuestions}
+                            questions={productQuestions}
                             onEditModalOpen={handleModalOpen}
                             showHiddenQuestions={showHiddenQuestions}
                         />
-                        {ticketQuestions
+                        {productQuestions
                             .filter(question => showHiddenQuestions || !question.is_hidden)
                             .length === 0 && (
                             <Card className={classes.noQuestionsAlert}>
@@ -347,7 +368,7 @@ export const QuestionsTable = ({questions}: QuestionsTableProp) => {
 
                             <h3>{t`Attendee questions`}</h3>
                             <DefaultQuestions/>
-                            {ticketQuestions
+                            {productQuestions
                                 .filter(question => showHiddenQuestions || !question.is_hidden)
                                 .map(question => (
                                     <QuestionInput key={question.id}

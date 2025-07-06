@@ -12,9 +12,10 @@ abstract class AttendeeCheckInDomainObjectAbstract extends \HiEvents\DomainObjec
     final public const PLURAL_NAME = 'attendee_check_ins';
     final public const ID = 'id';
     final public const CHECK_IN_LIST_ID = 'check_in_list_id';
-    final public const TICKET_ID = 'ticket_id';
+    final public const PRODUCT_ID = 'product_id';
     final public const ATTENDEE_ID = 'attendee_id';
     final public const EVENT_ID = 'event_id';
+    final public const ORDER_ID = 'order_id';
     final public const SHORT_ID = 'short_id';
     final public const IP_ADDRESS = 'ip_address';
     final public const DELETED_AT = 'deleted_at';
@@ -23,9 +24,10 @@ abstract class AttendeeCheckInDomainObjectAbstract extends \HiEvents\DomainObjec
 
     protected int $id;
     protected int $check_in_list_id;
-    protected int $ticket_id;
+    protected int $product_id;
     protected int $attendee_id;
     protected int $event_id;
+    protected ?int $order_id = null;
     protected string $short_id;
     protected string $ip_address;
     protected ?string $deleted_at = null;
@@ -37,9 +39,10 @@ abstract class AttendeeCheckInDomainObjectAbstract extends \HiEvents\DomainObjec
         return [
                     'id' => $this->id ?? null,
                     'check_in_list_id' => $this->check_in_list_id ?? null,
-                    'ticket_id' => $this->ticket_id ?? null,
+                    'product_id' => $this->product_id ?? null,
                     'attendee_id' => $this->attendee_id ?? null,
                     'event_id' => $this->event_id ?? null,
+                    'order_id' => $this->order_id ?? null,
                     'short_id' => $this->short_id ?? null,
                     'ip_address' => $this->ip_address ?? null,
                     'deleted_at' => $this->deleted_at ?? null,
@@ -70,15 +73,15 @@ abstract class AttendeeCheckInDomainObjectAbstract extends \HiEvents\DomainObjec
         return $this->check_in_list_id;
     }
 
-    public function setTicketId(int $ticket_id): self
+    public function setProductId(int $product_id): self
     {
-        $this->ticket_id = $ticket_id;
+        $this->product_id = $product_id;
         return $this;
     }
 
-    public function getTicketId(): int
+    public function getProductId(): int
     {
-        return $this->ticket_id;
+        return $this->product_id;
     }
 
     public function setAttendeeId(int $attendee_id): self
@@ -101,6 +104,17 @@ abstract class AttendeeCheckInDomainObjectAbstract extends \HiEvents\DomainObjec
     public function getEventId(): int
     {
         return $this->event_id;
+    }
+
+    public function setOrderId(?int $order_id): self
+    {
+        $this->order_id = $order_id;
+        return $this;
+    }
+
+    public function getOrderId(): ?int
+    {
+        return $this->order_id;
     }
 
     public function setShortId(string $short_id): self

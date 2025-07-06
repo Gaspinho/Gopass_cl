@@ -5,9 +5,12 @@ namespace HiEvents\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends BaseModel
 {
+    use SoftDeletes;
+
     public function question_and_answer_views(): HasMany
     {
         return $this->hasMany(QuestionAndAnswerView::class);
@@ -31,6 +34,16 @@ class Order extends BaseModel
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class)->orderBy('created_at', 'desc');
+    }
+
+    public function order_application_fee(): HasOne
+    {
+        return $this->hasOne(OrderApplicationFee::class);
     }
 
     protected function getCastMap(): array

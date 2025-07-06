@@ -4,9 +4,12 @@ namespace HiEvents\Models;
 
 use HiEvents\DomainObjects\Generated\QuestionDomainObjectAbstract;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Question extends BaseModel
 {
+    use SoftDeletes;
+
     protected function getCastMap(): array
     {
         return [
@@ -14,15 +17,10 @@ class Question extends BaseModel
         ];
     }
 
-    protected function getFillableFields(): array
-    {
-        return [];
-    }
-
-    public function tickets(): BelongsToMany
+    public function products(): BelongsToMany
     {
         return $this
-            ->belongsToMany(Ticket::class, 'ticket_questions')
-            ->whereNull('ticket_questions.deleted_at');
+            ->belongsToMany(Product::class, 'product_questions')
+            ->whereNull('product_questions.deleted_at');
     }
 }

@@ -7,18 +7,11 @@ namespace HiEvents\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Attendee extends BaseModel
 {
-    protected function getCastMap(): array
-    {
-        return [];
-    }
-
-    protected function getFillableFields(): array
-    {
-        return [];
-    }
+    use SoftDeletes;
 
     public function question_and_answer_views(): HasMany
     {
@@ -30,9 +23,9 @@ class Attendee extends BaseModel
         return $this->belongsTo(Order::class);
     }
 
-    public function ticket(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Ticket::class);
+        return $this->belongsTo(Product::class);
     }
 
     public function check_in(): HasOne
